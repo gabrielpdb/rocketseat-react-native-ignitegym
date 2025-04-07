@@ -5,10 +5,12 @@ import { UserPhoto } from "@components/UserPhoto"
 import { VStack, Text, Center, Heading } from "@gluestack-ui/themed"
 import { ScrollView, TouchableOpacity } from "react-native"
 import * as ImagePicker from "expo-image-picker"
+import * as FileSystem from "expo-file-system"
 import { useState } from "react"
 
 export function Profile() {
   const [userPhoto, setUserPhoto] = useState("https:github.com/gabrielpdb.png")
+
   async function handleUserPhotoSelect() {
     const photoSelected = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
@@ -21,7 +23,15 @@ export function Profile() {
       return
     }
 
-    setUserPhoto(photoSelected.assets[0].uri)
+    const photoURI = photoSelected.assets[0].uri
+
+    if (photoURI) {
+      const photoInfo = (await FileSystem.getInfoAsync(photoURI)) as {
+        size: number
+      }
+
+      setUserPhoto(photoURI)
+    }
   }
 
   return (

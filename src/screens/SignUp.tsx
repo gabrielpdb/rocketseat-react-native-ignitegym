@@ -150,6 +150,7 @@ export function SignUp() {
             title="Voltar para o login"
             variant="outline"
             mt={"$12"}
+            marginBottom={"$72"}
             onPress={handleGoBack}
           />
         </VStack>

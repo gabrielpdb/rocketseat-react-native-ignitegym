@@ -5,6 +5,7 @@ import {
   Text,
   Heading,
   ScrollView,
+  onChange,
 } from "@gluestack-ui//themed"
 
 import BackgroundImg from "@assets/background.png"
@@ -13,12 +14,28 @@ import { Input } from "@components/Input"
 import { Button } from "@components/Button"
 import { useNavigation } from "@react-navigation/native"
 import { AuthNavigatorRoutesProps } from "@routes/auth.routes"
+import { Controller, useForm } from "react-hook-form"
+
+type FormData = {
+  email: string
+  password: string
+}
 
 export function SignIn() {
   const navigation = useNavigation<AuthNavigatorRoutesProps>()
 
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>()
+
   function handleNewAccount() {
     navigation.navigate("signUp")
+  }
+
+  function handleSignIn({ email, password }: FormData) {
+    console.log(email, password)
   }
 
   return (
@@ -45,14 +62,37 @@ export function SignIn() {
           </Center>
           <Center gap={"$2"}>
             <Heading color="$gray100">Acesse a conta</Heading>
-            <Input
-              placeholder="E-mail"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <Input placeholder="Senha" secureTextEntry />
 
-            <Button title="Acessar" />
+            <Controller
+              control={control}
+              rules={{ required: "Informe o e-mail" }}
+              name="email"
+              render={({ field: { onChange } }) => (
+                <Input
+                  placeholder="E-mail"
+                  keyboardType="email-address"
+                  onChangeText={onChange}
+                  errorMessage={errors.email?.message}
+                  autoCapitalize="none"
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="password"
+              rules={{ required: "Informe a senha" }}
+              render={({ field: { onChange } }) => (
+                <Input
+                  placeholder="Senha"
+                  secureTextEntry
+                  onChangeText={onChange}
+                  errorMessage={errors.password?.message}
+                />
+              )}
+            />
+
+            <Button title="Acessar" onPress={handleSubmit(handleSignIn)} />
           </Center>
 
           <Center flex={1} justifyContent="flex-end" mt="$4">

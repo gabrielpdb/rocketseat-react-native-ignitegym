@@ -6,6 +6,9 @@ import {
   Heading,
   ScrollView,
   onChange,
+  useToast,
+  Toast,
+  ToastTitle,
 } from "@gluestack-ui//themed"
 
 import BackgroundImg from "@assets/background.png"
@@ -16,6 +19,7 @@ import { useNavigation } from "@react-navigation/native"
 import { AuthNavigatorRoutesProps } from "@routes/auth.routes"
 import { Controller, useForm } from "react-hook-form"
 import { useAuth } from "@hooks/useAuth"
+import { AppError } from "@utils/AppError"
 
 type FormData = {
   email: string
@@ -26,6 +30,7 @@ export function SignIn() {
   const { signIn } = useAuth()
 
   const navigation = useNavigation<AuthNavigatorRoutesProps>()
+  const toast = useToast()
 
   const {
     control,
@@ -38,7 +43,26 @@ export function SignIn() {
   }
 
   async function handleSignIn({ email, password }: FormData) {
-    await signIn(email, password)
+    try {
+      await signIn(email, password)
+    } catch (error) {
+      const isAppError = error instanceof AppError
+
+      const title = isAppError
+        ? error.message
+        : "Não foi possível entrar. Tente novamente mais tarde"
+
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Toast backgroundColor="$red500" action="error" variant="outline">
+            <ToastTitle color="$white" textAlign="center">
+              {title}
+            </ToastTitle>
+          </Toast>
+        ),
+      })
+    }
   }
 
   return (

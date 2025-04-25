@@ -1,6 +1,7 @@
 import { ExerciseCard } from "@components/ExerciseCard"
 import { Group } from "@components/Group"
 import { HomeHeader } from "@components/HomeHeader"
+import { ExerciseDTO } from "@dtos/ExerciseDTO"
 import {
   Heading,
   HStack,
@@ -10,22 +11,17 @@ import {
   useToast,
   VStack,
 } from "@gluestack-ui/themed"
-import { useNavigation } from "@react-navigation/native"
+import { useFocusEffect, useNavigation } from "@react-navigation/native"
 import { AppNavigatorRoutesProps } from "@routes/app.routes"
 import { api } from "@services/api"
 import { AppError } from "@utils/AppError"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { FlatList } from "react-native"
 
 export function Home() {
-  const [exercises, setExercises] = useState([
-    "Puxada frontal",
-    "Remada Curvada",
-    "Remada Unilateral",
-    "Levantamento Terra",
-  ])
+  const [exercises, setExercises] = useState<ExerciseDTO[]>([])
   const [groups, setGroups] = useState<string[]>([])
-  const [groupSelected, setGroupSelected] = useState("Costas")
+  const [groupSelected, setGroupSelected] = useState("costas")
 
   const toast = useToast()
   const navigation = useNavigation<AppNavigatorRoutesProps>()
@@ -58,9 +54,39 @@ export function Home() {
     }
   }
 
+  async function fetchExercisesByGroup() {
+    try {
+      const { data } = await api.get(`/exercises/bygroup/${groupSelected}`)
+
+      setExercises(data)
+    } catch (error) {
+      const isAppError = error instanceof AppError
+      const title = isAppError
+        ? error.message
+        : "Não foi possível carregar os exercícios"
+
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Toast backgroundColor="$red500" action="error" variant="outline">
+            <ToastTitle color="$white" textAlign="center">
+              {title}
+            </ToastTitle>
+          </Toast>
+        ),
+      })
+    }
+  }
+
   useEffect(() => {
     fetchGroups()
   }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchExercisesByGroup()
+    }, [groupSelected])
+  )
 
   return (
     <VStack flex={1}>
@@ -92,7 +118,7 @@ export function Home() {
         </HStack>
         <FlatList
           data={exercises}
-          keyExtractor={(item) => item}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <ExerciseCard onPress={handleOpenExerciseDetails} />
           )}

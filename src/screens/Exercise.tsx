@@ -5,6 +5,9 @@ import {
   Icon,
   Image,
   Text,
+  Toast,
+  ToastTitle,
+  useToast,
   VStack,
 } from "@gluestack-ui/themed"
 import { useNavigation, useRoute } from "@react-navigation/native"
@@ -16,19 +19,54 @@ import BodySvg from "@assets/body.svg"
 import SeriesSvg from "@assets/series.svg"
 import RepetitionSvg from "@assets/repetitions.svg"
 import { Button } from "@components/Button"
+import { AppError } from "@utils/AppError"
+import { api } from "@services/api"
+import { useEffect, useState } from "react"
+import { ExerciseDTO } from "@dtos/ExerciseDTO"
 
 type RouteParamsProps = {
   exerciseId: string
 }
 
 export function Exercise() {
+  const [exercise, setExercise] = useState<ExerciseDTO>({} as ExerciseDTO)
   const navigation = useNavigation<AppNavigatorRoutesProps>()
   const route = useRoute()
   const { exerciseId } = route.params as RouteParamsProps
+  const toast = useToast()
+
+  async function fetchExerciseDetails() {
+    try {
+      const { data } = await api.get(`/exercises/${exerciseId}`)
+
+      setExercise(data)
+    } catch (error) {
+      const isAppError = error instanceof AppError
+      const title = isAppError
+        ? error.message
+        : "Não foi possível carregar os detalhes do exercício"
+
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Toast backgroundColor="$red500" action="error" variant="outline">
+            <ToastTitle color="$white" textAlign="center">
+              {title}
+            </ToastTitle>
+          </Toast>
+        ),
+      })
+    }
+  }
 
   function handleGoBack() {
     navigation.goBack()
   }
+
+  useEffect(() => {
+    fetchExerciseDetails()
+  }, [exerciseId])
+
   return (
     <VStack flex={1}>
       <VStack px="$8" bg="$gray600" pt="$12">
@@ -47,12 +85,12 @@ export function Exercise() {
             fontSize={"$lg"}
             flexShrink={1}
           >
-            Puxada frontal
+            {exercise.name}
           </Heading>
           <HStack alignItems="center">
             <BodySvg />
             <Text color="$gray200" ml="$1" textTransform="capitalize">
-              Costas
+              {exercise.group}
             </Text>
           </HStack>
         </HStack>
@@ -65,7 +103,7 @@ export function Exercise() {
         <VStack p="$8">
           <Image
             source={{
-              uri: "https://i.ytimg.com/vi/hOCkiWXdEYg/maxresdefault.jpg",
+              uri: `${api.defaults.baseURL}/exercise/demo/${exercise.demo}`,
             }}
             alt="Exercício"
             mb="$3"
@@ -85,13 +123,13 @@ export function Exercise() {
               <HStack>
                 <SeriesSvg />
                 <Text color="$gray200" ml="$2">
-                  3 séries
+                  {exercise.series} séries
                 </Text>
               </HStack>
               <HStack>
                 <RepetitionSvg />
                 <Text color="$gray200" ml="$2">
-                  12 repetições
+                  {exercise.repetitions} repetições
                 </Text>
               </HStack>
             </HStack>

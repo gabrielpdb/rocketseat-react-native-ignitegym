@@ -3,15 +3,32 @@ import { Input } from "@components/Input"
 import { ScreenHeader } from "@components/ScreenHeader"
 import { UserPhoto } from "@components/UserPhoto"
 import { VStack, Text, Center, Heading, useToast } from "@gluestack-ui/themed"
-import { Alert, ScrollView, TouchableOpacity } from "react-native"
+import { ScrollView, TouchableOpacity } from "react-native"
 import * as ImagePicker from "expo-image-picker"
 import * as FileSystem from "expo-file-system"
 import { useState } from "react"
 import { ToastMessage } from "@components/ToastMessage"
+import { Controller, useForm } from "react-hook-form"
+import { useAuth } from "@hooks/useAuth"
+
+type FormDataProps = {
+  name: string
+  email: string
+  password: string
+  old_password: string
+  confirm_password: string
+}
 
 export function Profile() {
   const [userPhoto, setUserPhoto] = useState("https:github.com/gabrielpdb.png")
   const toast = useToast()
+  const { user } = useAuth()
+  const { control } = useForm<FormDataProps>({
+    defaultValues: {
+      name: user.name,
+      email: user.email,
+    },
+  })
 
   async function handleUserPhotoSelect() {
     try {
@@ -77,8 +94,30 @@ export function Profile() {
             </Text>
           </TouchableOpacity>
           <Center w="$full" gap="$4">
-            <Input placeholder="Nome" bg="$gray600" />
-            <Input value="gabriel@email.com" bg="$gray600" isReadOnly />
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { value, onChange } }) => (
+                <Input
+                  placeholder="Nome"
+                  bg="$gray600"
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { value, onChange } }) => (
+                <Input
+                  placeholder="E-mail"
+                  bg="$gray600"
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+            />
           </Center>
           <Heading
             alignSelf="flex-start"

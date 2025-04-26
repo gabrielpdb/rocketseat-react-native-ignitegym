@@ -78,7 +78,7 @@ export function Exercise() {
       toast.show({
         placement: "top",
         render: () => (
-          <Toast backgroundColor="$green700" action="error" variant="outline">
+          <Toast backgroundColor="$green700" action="success" variant="outline">
             <ToastTitle color="$white" textAlign="center">
               Parabéns! Exercício registrado no seu histórico
             </ToastTitle>

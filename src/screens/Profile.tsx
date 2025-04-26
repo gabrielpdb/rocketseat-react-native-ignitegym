@@ -56,7 +56,7 @@ export function Profile() {
       name: user.name,
       email: user.email,
     },
-    resolver: yupResolver(profileSchema),
+    resolver: yupResolver(profileSchema) as any,
   })
 
   async function handleUserPhotoSelect() {

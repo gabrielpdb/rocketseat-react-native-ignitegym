@@ -23,7 +23,7 @@ export function Profile() {
   const [userPhoto, setUserPhoto] = useState("https:github.com/gabrielpdb.png")
   const toast = useToast()
   const { user } = useAuth()
-  const { control } = useForm<FormDataProps>({
+  const { control, handleSubmit } = useForm<FormDataProps>({
     defaultValues: {
       name: user.name,
       email: user.email,
@@ -69,6 +69,10 @@ export function Profile() {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  async function handleProfileUpdate(data: FormDataProps) {
+    console.log(data)
   }
 
   return (
@@ -130,15 +134,47 @@ export function Profile() {
             Alterar senha
           </Heading>
           <Center w="$full" gap="$4">
-            <Input placeholder="Senha antiga" bg="$gray600" secureTextEntry />
-            <Input placeholder="Nova senha" bg="$gray600" secureTextEntry />
-            <Input
-              placeholder="Confirme a nova senha"
-              bg="$gray600"
-              secureTextEntry
+            <Controller
+              control={control}
+              name="old_password"
+              render={({ field: { onChange } }) => (
+                <Input
+                  placeholder="Senha antiga"
+                  bg="$gray600"
+                  onChangeText={onChange}
+                  secureTextEntry
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange } }) => (
+                <Input
+                  placeholder="Nova senha"
+                  bg="$gray600"
+                  onChangeText={onChange}
+                  secureTextEntry
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="confirm_password"
+              render={({ field: { onChange } }) => (
+                <Input
+                  placeholder="Confirme a nova senha"
+                  bg="$gray600"
+                  onChangeText={onChange}
+                  secureTextEntry
+                />
+              )}
             />
 
-            <Button title="Atualizar" />
+            <Button
+              title="Atualizar"
+              onPress={handleSubmit(handleProfileUpdate)}
+            />
           </Center>
         </Center>
       </ScrollView>

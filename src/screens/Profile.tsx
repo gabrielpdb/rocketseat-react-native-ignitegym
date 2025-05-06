@@ -111,9 +111,31 @@ export function Profile() {
           name: `${user.name}.${fileExtension}`.toLowerCase(),
           uri: photoURI,
           type: `${photoSelected.assets[0].type}/${fileExtension}`,
-        }
+        } as any
 
-        console.log(photoFile)
+        const userPhotoUploadForm = new FormData()
+        userPhotoUploadForm.append("avatar", photoFile)
+
+        await api.patch("/users/avatar", userPhotoUploadForm, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+
+        toast.show({
+          placement: "top",
+          render: () => (
+            <Toast
+              backgroundColor="$green500"
+              action="success"
+              variant="outline"
+            >
+              <ToastTitle color="$white" textAlign="center">
+                Foto atualizada
+              </ToastTitle>
+            </Toast>
+          ),
+        })
       }
     } catch (error) {
       console.log(error)

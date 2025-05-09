@@ -10,8 +10,6 @@ import { api } from "@services/api"
 export function HomeHeader() {
   const { user, signOut } = useAuth()
 
-  console.log(user)
-
   return (
     <HStack
       bg="$gray600"
